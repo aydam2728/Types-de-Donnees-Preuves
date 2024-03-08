@@ -32,5 +32,13 @@ let parse infile =
     failwith "Stopped execution."
 ;;
 
+let tc infile =
+  let p = (parse infile) in
+  (Typing.tp_prog p)
+;;
 
-
+let eval infile =
+  let p = (parse infile) in
+  let _ = (Typing.tp_prog p) in
+  Eval.eval_prog p
+;;
