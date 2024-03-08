@@ -12,7 +12,12 @@ let tp_const = function
 | IntV -> IntT;;
 
 let tp_var env v = 
-    
+
+let function_type_correct tf targs = 
+    match tf with
+    | FunT (a, b) (ta :: reste) -> a = ta
+
+
 let tp_expr env = function
 | Const c -> tp_const c
 | VarE v -> tp_var env v
