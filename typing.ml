@@ -7,27 +7,40 @@ type environment =
     {localvar: (vname * tp) list; 
      funbind: (vname * fpdecl) list}
 
-let tp_const = function
-| BoolV _ -> BoolT
-| IntV -> IntT;;
+let tp_const  = function
+    | BoolV -> BoolT
+    | IntV -> IntT
+    | _ -> failwith "tp_const : internal error"
 
-let tp_var env v = 
-
-let function_type_correct tf targs = 
-    match tf with
-    | FunT (a, b) (ta :: reste) -> a = ta
-
-
-let tp_expr env = function
-| Const c -> tp_const c
-| VarE v -> tp_var env v
-| CallE es -> g
-| BinOp (b, e1, e2) -> match b with | BArith b -> let e1 = tp_expr env e1 in let e2 = tp_expr env e2 in if e1 = IntT && e2 = IntT then IntT else failwith "Probleme de typage" 
-                                    | BLogic b -> let e1 = tp_expr env e1 in let e2 = tp_expr env e2 in if e1 = BoolT && e2 = BoolT then BoolT else failwith "Probleme de typage"
-                                    | BCompar b -> let e1 = tp_expr env e1 in let e2 = tp_expr env e2 in if e1 = IntT && e2 = IntT then BoolT else failwith "Probleme de typage"
-|IfThenElse (e1, e2, e3) -> let e1 = tp_expr env e1 in let e2 = tp_expr env e2 in let e3 = tp_expr env e3 in if e1 = BoolT && e2 = e3 then e2 else failwith "Probleme de typage"
-|_ -> failwith "a completer"
+let tp_var environment = function
+    | Var v -> check environment.localvar v
+    | Fun f -> check environment.funbind f
+    | _ -> failwith "tp_var : internal error"
 
     
-(* TODO: implement *)
+let rec check vn = function
+        | [] -> failwith "tp_var : internal error"
+        | (vn, fp) :: _ when vn = v -> fp
+        | _ :: vs -> check vn vs
+
+let rec tp_application ft argst =
+    
+let tp_fdefn environment (Fundefn (f, fps, e)) = 
+    let environment' = {localvar = fps; funbind = environment.funbind} in
+    let et = tp_expr environment' e in
+    if et = ft then ft else failwith "tp_fdefn : internal error"
+    
+
+let tp_prog (Prog (fdfs, e)) = IntT
+
+let rec tp_expr environment  = function
+    | Const expr -> tp_const expr
+    | VarE expr -> tp_var expr
+    | CallE (f, args) -> 
+        let ft = tp_expr environment f in 
+        let argst = List.map (tp_expr environment) args in
+        tp_application ft argst
+    | CallE (_) -> failwith "tp_expr : internal error"
+
+
 let tp_prog (Prog (fdfs, e)) = IntT
